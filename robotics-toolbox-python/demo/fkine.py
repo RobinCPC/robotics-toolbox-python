@@ -59,7 +59,7 @@ pause % any key to continue
 #
 # Elements (0:2,3) correspond to the X, Y and Z coordinates respectively, and 
 # may be plotted against time
-    x = array([e[0,3] for e in T])
+    x = array([e[0,3] for e in T]);
     y = array([e[1,3] for e in T]);
     z = array([e[2,3] for e in T]);
     subplot(3,1,1);

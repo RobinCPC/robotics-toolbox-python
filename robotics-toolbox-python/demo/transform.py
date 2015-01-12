@@ -27,7 +27,7 @@ if __name__ == '__main__':
 # a rotation of 90degrees about the Y axis by
     roty(pi/2)
 #
-# and a rotation of -90degrees about the Z axis by
+# and a rotation of -90 degrees about the Z axis by
     rotz(-pi/2)
 #
 #  these may be concatenated by multiplication

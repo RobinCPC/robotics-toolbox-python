@@ -126,9 +126,9 @@ from Link import *
 from utility import *
 from transform import *
 from robot import *
-import mpl_toolkits.mplot3d.axes3d as p3
+import mpl_toolkits.mplot3d.axes3d #as p3
 import pylab as p   # for figure
-
+import matplotlib.pyplot as plt
 
 def plot(robot, tg, workspace=None, delay=None, cylinder=None, mag=None, perspective=True, Raise=True, render=True, loop=True, base=True, wrist=True, shadow=True, name=True, xyz=True,jaxes=True,joints=True):
 
@@ -142,14 +142,14 @@ def plot(robot, tg, workspace=None, delay=None, cylinder=None, mag=None, perspec
     np = numrows(tg)
     n = robot.n
 
-    if numcols(tg) ~= n:
+    if numcols(tg) != n:
         error('Insufficient columns in q')
 
     
     # get handle of any existing robot of same name
     rh = findobj('Tag', robot.name)
 
-    if isempty(rh) || isempty( get(gcf, 'Children')):
+    if isempty(rh) | isempty( get(gcf, 'Children')):
         # no robot of this name exists
 
         # create one
@@ -165,7 +165,7 @@ def plot(robot, tg, workspace=None, delay=None, cylinder=None, mag=None, perspec
         rh = h.robot
     
 
-    if ishold && isempty( findobj(gca, 'Tag', robot.name)):
+    if ishold & isempty( findobj(gca, 'Tag', robot.name)):
         # if hold is on and no robot of this name in current axes
         h = create_new_robot(robot, opt)
         # save the handles in the passed robot object, and
@@ -177,14 +177,14 @@ def plot(robot, tg, workspace=None, delay=None, cylinder=None, mag=None, perspec
         rh = h.robot
     
     
-    if opt.raise,:
+    if opt.Raise:
         figure(gcf)
     
 
     while true:
         for p in range(0,np):
             for r in rh.T:
-                animate( get(r, 'UserData'), tg(p,:), opt)
+                animate( get(r, 'UserData'), tg[p:], opt)
                 if opt.delay > 0:
                     pause(opt.delay)
                 
@@ -198,7 +198,7 @@ def plot(robot, tg, workspace=None, delay=None, cylinder=None, mag=None, perspec
     # save the last joint angles away in the graphical robot
     for r in rh.T:
         rr = get(r, 'UserData')
-        rr.q = tg(end,:)
+        rr.q = tg[end:]
         set(r, 'UserData', rr)
     
     if nargout > 0:
@@ -225,10 +225,10 @@ def plot_options(robot, workspace, delay, cylinder, mag, perspective, Raise, ren
         #
         L = robot.links()
         reach = 0
-        for i in range(1:robot.n):
+        for i in range(1,robot.n):
             reach = reach + abs(L(i).a) + abs(L(i).d)
 
-        o.workspace = [-reach reach -reach reach -reach reach]
+        o.workspace = [-reach, reach, -reach, reach, -reach, reach]
         o.mag = reach/10
     else:
         reach = min(abs(workspace))
@@ -237,16 +237,16 @@ def plot_options(robot, workspace, delay, cylinder, mag, perspective, Raise, ren
     o.mag = o.magscale * reach/10
 
     #set delay
-    if delay ~= None:
+    if delay != None:
         o.delay = delay
     else:
         delay = 0.1
 
     # set cylinder
-    if cylinder ~= None:
+    if cylinder != None:
         o.cylinder = cylinder
     else:
-        o.cylinder = [0 0 0.7]
+        o.cylinder = [0, 0, 0.7]
 
     #set perspective
     if perspective == True:
@@ -261,7 +261,7 @@ def plot_options(robot, workspace, delay, cylinder, mag, perspective, Raise, ren
         o.Raise = False
 
     #set render
-    if render = True:
+    if render == True:
         o.render = True
     else:
         o.render = False
@@ -309,7 +309,7 @@ def plot_options(robot, workspace, delay, cylinder, mag, perspective, Raise, ren
         o.jaxes = False
 
     #set joints
-    if joints = True:
+    if joints == True:
         o.joints = True
     else:
         o.joints = False
@@ -365,7 +365,7 @@ def create_new_robot(robot, opt):
     ylabel('Y')
     zlabel('Z')
     set(gca, 'drawmode', 'fast')
-    grid on
+    grid() #on
 
 
     zlim = get(gca, 'ZLim')
@@ -373,27 +373,28 @@ def create_new_robot(robot, opt):
 
     if opt.base:
         b = transl(robot.base)
-        line('xdata', [b(1);b(1)], 'ydata', [b(2);b(2)], 'zdata', [h.zmin;b(3)], 'LineWidth', 4, 'color', 'red')
+        line('xdata', [b(1), b(1)], 'ydata', [b(2), b(2)], 'zdata', [h.zmin, b(3)], 'LineWidth', 4, 'color', 'red')
     
     
     if opt.name:
         b = transl(robot.base)
-        text(b(1), b(2)-opt.mag, [' ' robot.name], 'FontAngle', 'italic', 'FontWeight', 'bold')
+        text(b(1), b(2)-opt.mag, [' '] + robot.name, 'FontAngle', 'italic', 'FontWeight', 'bold')
     
     # create a line which we will
     # subsequently modify.  Set erase mode to xor for fast
     # update
     #
-    h.robot = line(robot.lineopt{:})
+    #h.robot = line(robot.lineopt{:})    # temp comment 
     
-    if opt.shadow:
-        h.shadow = line(robot.shadowopt{:}, 'Erasemode', opt.erasemode)
+    if opt.shadow:  # temp comment
+        print 'shadow not work now'
+        #h.shadow = line(robot.shadowopt{:}, 'Erasemode', opt.erasemode)
     
 
     if opt.wrist:   
-        h.x = line('xdata', [0;0], 'ydata', [0;0], 'zdata', [0;0], 'color', 'red')
-        h.y = line('xdata', [0;0], 'ydata', [0;0], 'zdata', [0;0], 'color', 'green')
-        h.z = line('xdata', [0;0], 'ydata', [0;0], 'zdata', [0;0], 'color', 'blue')
+        h.x = line('xdata', [0,0], 'ydata', [0,0], 'zdata', [0,0], 'color', 'red')
+        h.y = line('xdata', [0,0], 'ydata', [0,0], 'zdata', [0,0], 'color', 'green')
+        h.z = line('xdata', [0,0], 'ydata', [0,0], 'zdata', [0,0], 'color', 'blue')
         h.xt = text(0, 0, opt.wristlabel(1), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center')
         h.yt = text(0, 0, opt.wristlabel(2), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center')
         h.zt = text(0, 0, opt.wristlabel(3), 'FontWeight', 'bold', 'HorizontalAlignment', 'Center')
@@ -405,7 +406,7 @@ def create_new_robot(robot, opt):
     # each joint, as well as axis centerline.
     #
     L = robot.links
-    for i=1:robot.n:
+    for i in range(robot.n):
         
         if opt.joints:
 
@@ -417,33 +418,33 @@ def create_new_robot(robot, opt):
             
             # define the vertices of the cylinder
             [xc,yc,zc] = cylinder(opt.mag/4, N)
-            zc(zc==0) = -opt.mag/2
-            zc(zc==1) = opt.mag/2
+            zc[zc==0] = -opt.mag/2
+            zc[zc==1] = opt.mag/2
 
             # create vertex color data
             cdata = zeros(size(xc))
-            for j in range(0:2):
-                cdata(:,:,j) = opt.cylinder(j)
+            for j in range(3):
+                cdata[:][:][j] = opt.cylinder(j)
             
             # render the surface
-            h.joint(i) = surface(xc,yc,zc,cdata)
+            h.joint[i] = surface(xc,yc,zc,cdata)
             
             # set the surfaces to be smoothed and translucent
-            set(h.joint(i), 'FaceColor', 'interp')
-            set(h.joint(i), 'EdgeColor', 'none')
-            set(h.joint(i), 'FaceAlpha', 0.7)
+            set(h.joint[i], 'FaceColor', 'interp')
+            set(h.joint[i], 'EdgeColor', 'none')
+            set(h.joint[i], 'FaceAlpha', 0.7)
 
             # build a matrix of coordinates so we
             # can transform the cylinder in animate()
             # and hang it off the cylinder
-            xyz = [xc(:)'; yc(:)'; zc(:)'; ones(1,2*N+2)]
-            set(h.joint(i), 'UserData', xyz)
+            xyz = [xc[:], yc[:], zc[:], ones(1,2*N+2)]
+            set(h.joint[i], 'UserData', xyz)
         
 
         if opt.jaxes:
             # add a dashed line along the axis
-            h.jointaxis(i) = line('xdata', [0;0], 'ydata', [0;0], 'zdata', [0;0], 'color', 'blue', 'linestyle', ':')
-            h.jointlabel(i) = text(0, 0, 0, num2str(i), 'HorizontalAlignment', 'Center')
+            h.jointaxis[i] = line('xdata', [0,0], 'ydata', [0,0], 'zdata', [0,0], 'color', 'blue', 'linestyle', ':')
+            h.jointlabel[i] = text(0, 0, 0, num2str(i), 'HorizontalAlignment', 'Center')
         
     
 
@@ -475,17 +476,17 @@ def animate(robot, q, opt):
     # for the animation.
     t = robot.base
     Tn = t
-    for j in range(1:n):
-        Tn(:,:,j) = t
+    for j in range(1,n):
+        Tn[:][:][j] = t
 
         t = t * L(j).A(q(j))
 
-        x = [x; t(1,4)]
-        y = [y; t(2,4)]
-        z = [z; t(3,4)]
-        xs = [xs; t(1,4)]
-        ys = [ys; t(2,4)]
-        zs = [zs; h.zmin]
+        x = [x, t(1,4)]
+        y = [y, t(2,4)]
+        z = [z, t(3,4)]
+        xs = [xs, t(1,4)]
+        ys = [ys, t(2,4)]
+        zs = [zs, h.zmin]
     
     t = t *robot.tool
 
@@ -502,24 +503,24 @@ def animate(robot, q, opt):
     # display the joints as cylinders with rotation axes
     #
     if isfield(h, 'joint'):
-        xyz_line = [0 0; 0 0; -2*mag 2*mag; 1 1]
+        xyz_line = [[0, 0], [0, 0], [-2*mag, 2*mag], [1, 1]]
 
-        for j in range(0:n):
+        for j in range(n):
             # get coordinate data from the cylinder
             xyz = get(h.joint(j), 'UserData')
-            xyz = Tn(:,:,j) * xyz
+            xyz = Tn[:][:][j] * xyz
             ncols = numcols(xyz)/2
-            xc = reshape(xyz(1,:), 2, ncols)
-            yc = reshape(xyz(2,:), 2, ncols)
-            zc = reshape(xyz(3,:), 2, ncols)
+            xc = reshape(xyz[1][:], 2, ncols)
+            yc = reshape(xyz[2][:], 2, ncols)
+            zc = reshape(xyz[3][:], 2, ncols)
 
             set(h.joint(j), 'Xdata', xc, 'Ydata', yc, 'Zdata', zc)
 
-            xyzl = Tn(:,:,j) * xyz_line
+            xyzl = Tn[:][:][j] * xyz_line
                    
             if isfield(h, 'jointaxis'):
-                set(h.jointaxis(j), 'Xdata', xyzl(1,:), 'Ydata', xyzl(2,:), 'Zdata', xyzl(3,:))
-                set(h.jointlabel(j), 'Position', xyzl(1:3,1))
+                set(h.jointaxis(j), 'Xdata', xyzl[1][:], 'Ydata', xyzl[2][:], 'Zdata', xyzl[3][:])
+                set(h.jointlabel(j), 'Position', xyzl[1:3][1])
             
 
     #
@@ -530,17 +531,33 @@ def animate(robot, q, opt):
         # compute the wrist axes, based on final link transformation
         # plus the tool transformation.
         #
-        xv = t*[mag;0;0;1]
-        yv = t*[0;mag;0;1]
-        zv = t*[0;0;mag;1]
+        xv = t*[mag,0,0,1]
+        yv = t*[0,mag,0,1]
+        zv = t*[0,0,mag,1]
 
         #
         # update the line segments, wrist axis and links
         #
-        set(h.x,'xdata',[t(1,4) xv(1)], 'ydata', [t(2,4) xv(2)], 'zdata', [t(3,4) xv(3)])
-        set(h.y,'xdata',[t(1,4) yv(1)], 'ydata', [t(2,4) yv(2)], 'zdata', [t(3,4) yv(3)])
-        set(h.z,'xdata',[t(1,4) zv(1)], 'ydata', [t(2,4) zv(2)], 'zdata', [t(3,4) zv(3)])
-        set(h.xt, 'Position', xv(1:3))
-        set(h.yt, 'Position', yv(1:3))
-        set(h.zt, 'Position', zv(1:3))
+        set(h.x,'xdata',[t(1,4), xv(1)], 'ydata', [t(2,4), xv(2)], 'zdata', [t(3,4), xv(3)])
+        set(h.y,'xdata',[t(1,4), yv(1)], 'ydata', [t(2,4), yv(2)], 'zdata', [t(3,4), yv(3)])
+        set(h.z,'xdata',[t(1,4), zv(1)], 'ydata', [t(2,4), zv(2)], 'zdata', [t(3,4), zv(3)])
+        set(h.xt, 'Position', xv[1:3])
+        set(h.yt, 'Position', yv[1:3])
+        set(h.zt, 'Position', zv[1:3])
+
     
+def line(name_d1 = 'x', data1 = [], name_d2 = 'y', data2 = [], name_d3 = 'z', data3 = [], *arguments):
+    #import matplotlib.pyplot as plt
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection = '3d')
+    axw = ax.plot_wireframe(data1, data2, data3)
+    ax.set_xlabel(name_d1)
+    ax.set_ylabel(name_d2)
+    ax.set_zlabel(name_d3)
+    for a in range(len(arguments)/2):
+        if arguments[2*a] == 'LineWidth':
+            #plt.setp(axw, arguments[2*a], arguments[2*a+1])
+            axw.set_linewidth(arguments[2*a+1])
+        if arguments[2*a] == 'color':
+            axw.set_color(arguments[2*a+1])
+    plt.show()

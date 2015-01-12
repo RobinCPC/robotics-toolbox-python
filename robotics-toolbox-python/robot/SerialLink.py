@@ -206,8 +206,8 @@ class SerialLink(object):
     def ospace(self, q, qd):
         return ospace(self, q, qd)
 
-    def plot(self, tg, varargin):
-        return plot(self, tg, varargin)
+#    def plot(self, tg, varargin):
+#        return plot(self, tg, varargin)
     
     
 ##------------------------------------------------------------------------------------------------
